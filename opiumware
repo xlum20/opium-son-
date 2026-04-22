@@ -172,7 +172,7 @@ rm -f ~/Opiumware/modules/update.json 2>/dev/null || true
 step "Fetching client version"
 INST_FILE="$(curl -fsSL https://raw.githubusercontent.com/norbyv1/OpiumwareInstall/refs/heads/main/inst)" \
     || fail "Could not reach version server"
-VERSION="$(echo "$INST_FILE" | grep -m1 '^version=' | cut -d'"' -f2)"
+VERSION="$(echo "$INST_FILE" | grep -m1 'version=' | cut -d'"' -f2 || true)"
 [[ -n "$VERSION" ]] || fail "Could not parse version"
 info "Version: ${BOLD}$VERSION${NC}"
 
