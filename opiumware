@@ -104,7 +104,7 @@ cat <<'EOF'
 EOF
 echo -e "${NC}"
 echo -e "${BLUE}=[ Opiumware (Intel) Installer ]=${NC}"
-echo -e "${CYAN}Developed by @norbyv1 | Fixed build by trial support king dior${NC}"
+echo -e "${CYAN}Developed by @norbyv1 | Fixed build by trial support king dior | beta v1 ${NC}"
 [[ "$DEBUG" -eq 1 ]] && warn "Debug mode ON"
 
 step "Fetching latest URLs"
