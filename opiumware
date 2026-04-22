@@ -104,7 +104,7 @@ cat <<'EOF'
 EOF
 echo -e "${NC}"
 echo -e "${BLUE}=[ Opiumware (Intel) Installer ]=${NC}"
-echo -e "${CYAN}Developed by @norbyv1 | Fixed build by trial support king dior tuffy boi${NC}"
+echo -e "${CYAN}Developed by @norbyv1 | Fixed build by trial support king dior v0.2 ${NC}"
 [[ "$DEBUG" -eq 1 ]] && warn "Debug mode ON"
 
 step "Fetching latest URLs"
@@ -175,7 +175,7 @@ rm -rf ~/Opiumware/modules/LuauLSP ~/Opiumware/modules/decompiler
 rm -f ~/Opiumware/modules/update.json 2>/dev/null || true
 
 step "Fetching client version"
-VERSION="version-0b2afd6436e74a1f"
+VERSION="version-08d2b9589bf14135"
 info "Version: ${BOLD}$VERSION${NC}"
 
 MIMALLOC="$APP_DIR/Roblox.app/Contents/MacOS/libmimalloc.3.dylib"
