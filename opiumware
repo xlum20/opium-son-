@@ -18,9 +18,8 @@ CHECK="${GREEN}✔${NC}"
 CROSS="${RED}✖${NC}"
 INFO="${CYAN}➜${NC}"
 WARN="${YELLOW}⚠${NC}"
-
-UI_URL_NEW="https://q3p1xj20dh.ufs.sh/f/BrzckOVD7pCZXic4yblOrXx5SwcQKWkvE8P629ny4DmGCYVA"
-UI_URL_LEGACY="https://x099xkycxe.ufs.sh/f/ar75CUBjeUn973Un5SgiSg2Cb3OUYDHqn5ozMk0fmAtRrcsx"
+UI_URL_NEW="https://x099xkycxe.ufs.sh/f/ar75CUBjeUn9SqRVN7ZrzmeZJ1BNkhvFnjVlg3PaHqYESfiU"
+UI_URL_LEGACY="https://f3a5dqxez3.ufs.sh/f/ijk9xZzvhn3rD2IKHTvR2QK1iVgakWyNDMPsXvcA9eG8xIHn"
 
 DEBUG=0
 [[ "${1:-}" == "--debug" ]] && DEBUG=1
@@ -170,23 +169,16 @@ rm -rf ~/Opiumware/modules/LuauLSP ~/Opiumware/modules/decompiler
 rm -f ~/Opiumware/modules/update.json 2>/dev/null || true
 
 step "Fetching client version"
-VERSION="version-08d2b9589bf14135"
+VERSION="version-0b2afd6436e74a1f"
 info "Version: ${BOLD}$VERSION${NC}"
 
 MIMALLOC="$APP_DIR/Roblox.app/Contents/MacOS/libmimalloc.3.dylib"
 
 step "Downloading..."
-(
-    curl -fsSL "https://setup.rbxcdn.com/mac/$VERSION-RobloxPlayer.zip" -o "$TEMP/RobloxPlayer.zip" &
-    curl -fsSL "$DYLIB_URL"   -o "$TEMP/libOpiumware.zip" &
-    curl -fsSL "$MODULES_URL" -o "$TEMP/modules.zip" &
-    curl -fsSL "$UI_URL"      -o "$TEMP/OpiumwareUI.zip" &
-    wait
-)
-[[ -f "$TEMP/RobloxPlayer.zip" ]] || fail "RobloxPlayer.zip download failed"
-[[ -f "$TEMP/libOpiumware.zip" ]] || fail "libOpiumware.zip download failed"
-[[ -f "$TEMP/modules.zip" ]]      || fail "modules.zip download failed"
-[[ -f "$TEMP/OpiumwareUI.zip" ]]  || fail "OpiumwareUI.zip download failed"
+curl -fsSL "https://setup.rbxcdn.com/mac/$VERSION-RobloxPlayer.zip" -o "$TEMP/RobloxPlayer.zip" || fail "RobloxPlayer.zip download failed — version $VERSION may be outdated"
+curl -fsSL "$DYLIB_URL"   -o "$TEMP/libOpiumware.zip" || fail "libOpiumware.zip download failed"
+curl -fsSL "$MODULES_URL" -o "$TEMP/modules.zip"      || fail "modules.zip download failed"
+curl -fsSL "$UI_URL"      -o "$TEMP/OpiumwareUI.zip"  || fail "OpiumwareUI.zip download failed"
 ok "Downloading... - Completed"
 
 step "Installing Opiumware modules"
