@@ -18,8 +18,9 @@ CHECK="${GREEN}✔${NC}"
 CROSS="${RED}✖${NC}"
 INFO="${CYAN}➜${NC}"
 WARN="${YELLOW}⚠${NC}"
+
 UI_URL_NEW="https://x099xkycxe.ufs.sh/f/ar75CUBjeUn9SqRVN7ZrzmeZJ1BNkhvFnjVlg3PaHqYESfiU"
-UI_URL_LEGACY="https://f3a5dqxez3.ufs.sh/f/ijk9xZzvhn3rD2IKHTvR2QK1iVgakWyNDMPsXvcA9eG8xIHn"
+UI_URL_LEGACY="https://x099xkycxe.ufs.sh/f/ar75CUBjeUn973Un5SgiSg2Cb3OUYDHqn5ozMk0fmAtRrcsx"
 
 DEBUG=0
 [[ "${1:-}" == "--debug" ]] && DEBUG=1
@@ -115,28 +116,33 @@ MODULES_URL="$(echo "$REMOTE_INST" | grep -m1 '^MODULES_URL=' | cut -d'"' -f2)"
 [[ -n "$MODULES_URL" ]] || fail "Could not parse MODULES_URL"
 ok "URLs loaded"
 
-echo
-echo -e "${BOLD}Would you like to use the Old UI (Legacy)?${NC}"
-echo -e "  ${GREEN}[Y]${NC} Yes — install Legacy UI"
-echo -e "  ${CYAN}[N]${NC} No  — install latest UI  ${YELLOW}(recommended)${NC}"
-echo
-read -rp "$(echo -e "${BOLD}Choice [Y/N]: ${NC}")" UI_CHOICE </dev/tty
-
-UI_CHOICE_UPPER="$(echo "$UI_CHOICE" | tr '[:lower:]' '[:upper:]')"
-case "$UI_CHOICE_UPPER" in
-    Y|YES)
-        UI_URL="$UI_URL_LEGACY"
-        echo -e "${CHECK} Using ${YELLOW}Legacy UI${NC}"
-        ;;
-    N|NO|"")
-        UI_URL="$UI_URL_NEW"
-        echo -e "${CHECK} Using ${GREEN}Latest UI${NC}"
-        ;;
-    *)
-        warn "Unrecognised input — defaulting to Latest UI"
-        UI_URL="$UI_URL_NEW"
-        ;;
-esac
+MACOS_MAJOR="$(sw_vers -productVersion | awk -F. '{print $1}')"
+if [[ "$MACOS_MAJOR" -le 11 ]]; then
+    UI_URL="$UI_URL_LEGACY"
+    info "macOS $MACOS_MAJOR detected — using Legacy UI automatically"
+else
+    echo
+    echo -e "${BOLD}Would you like to use the Old UI (Legacy)?${NC}"
+    echo -e "  ${GREEN}[Y]${NC} Yes — install Legacy UI"
+    echo -e "  ${CYAN}[N]${NC} No  — install latest UI  ${YELLOW}(recommended)${NC}"
+    echo
+    read -rp "$(echo -e "${BOLD}Choice [Y/N]: ${NC}")" UI_CHOICE </dev/tty
+    UI_CHOICE_UPPER="$(echo "$UI_CHOICE" | tr '[:lower:]' '[:upper:]')"
+    case "$UI_CHOICE_UPPER" in
+        Y|YES)
+            UI_URL="$UI_URL_LEGACY"
+            echo -e "${CHECK} Using ${YELLOW}Legacy UI${NC}"
+            ;;
+        N|NO|"")
+            UI_URL="$UI_URL_NEW"
+            echo -e "${CHECK} Using ${GREEN}Latest UI${NC}"
+            ;;
+        *)
+            warn "Unrecognised input — defaulting to Latest UI"
+            UI_URL="$UI_URL_NEW"
+            ;;
+    esac
+fi
 
 if [ -w "/Applications" ]; then
     APP_DIR="/Applications"
@@ -212,6 +218,29 @@ step "Installing Opiumware modules"
     mv -f "$TEMP/Resources/decompiler" ~/Opiumware/modules/decompiler/Decompiler
     mv -f "$TEMP/Resources/LuauLSP"    ~/Opiumware/modules/LuauLSP/LuauLSP
     tccutil reset ScreenCapture com.norbyv1.opiumware >/dev/null 2>&1 || true
+
+    cat > ~/Opiumware/autoexec/loadingfix.lua << 'LUAEOF'
+if not game:IsLoaded() then
+   game.Loaded:Wait()
+end
+LUAEOF
+
+    touch ~/Opiumware/autoexec/blank.lua
+
+    PLIST="$APP_DIR/Roblox.app/Contents/Info.plist"
+    if [[ -f "$PLIST" ]]; then
+        plutil -replace CFBundleExecutable -string "RobloxPlayer" "$PLIST" 2>/dev/null || true
+    fi
+
+    LAUNCHER="$APP_DIR/Roblox.app/Contents/MacOS/RobloxLauncher"
+    if [[ -f "$LAUNCHER" ]]; then
+        mv -f "$LAUNCHER" "$LAUNCHER.bak" 2>/dev/null || true
+    fi
+    cat > "$APP_DIR/Roblox.app/Contents/MacOS/RobloxLauncher" << 'SHEOF'
+#!/usr/bin/env bash
+exec "$(dirname "$0")/RobloxPlayer" "$@"
+SHEOF
+    chmod +x "$APP_DIR/Roblox.app/Contents/MacOS/RobloxLauncher"
 ) & spinner "Installing" $!
 
 if [[ "$DEBUG" -eq 1 ]]; then
