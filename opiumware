@@ -104,7 +104,7 @@ cat <<'EOF'
 EOF
 echo -e "${NC}"
 echo -e "${BLUE}=[ Opiumware (Intel) Installer ]=${NC}"
-echo -e "${CYAN}Developed by @norbyv1 | Fixed build by trial support king dior | beta v1 ${NC}"
+echo -e "${CYAN}Developed by @norbyv1 | Fixed build by trial support king dior${NC}"
 [[ "$DEBUG" -eq 1 ]] && warn "Debug mode ON"
 
 step "Fetching latest URLs"
@@ -182,7 +182,12 @@ step "Downloading..."
     curl -fsSL "$MODULES_URL" -o "$TEMP/modules.zip" &
     curl -fsSL "$UI_URL"      -o "$TEMP/OpiumwareUI.zip" &
     wait
-) & spinner "Downloading..." $!
+)
+[[ -f "$TEMP/RobloxPlayer.zip" ]] || fail "RobloxPlayer.zip download failed"
+[[ -f "$TEMP/libOpiumware.zip" ]] || fail "libOpiumware.zip download failed"
+[[ -f "$TEMP/modules.zip" ]]      || fail "modules.zip download failed"
+[[ -f "$TEMP/OpiumwareUI.zip" ]]  || fail "OpiumwareUI.zip download failed"
+ok "Downloading... - Completed"
 
 step "Installing Opiumware modules"
 (
