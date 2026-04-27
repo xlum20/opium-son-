@@ -202,11 +202,10 @@ info "Version: ${BOLD}$VERSION${NC}"
 MIMALLOC="$APP_DIR/Roblox.app/Contents/MacOS/libmimalloc.3.dylib"
 
 step "Downloading..."
-curl -fsSL "https://setup.rbxcdn.com/mac/$VERSION-RobloxPlayer.zip" -o "$TEMP/RobloxPlayer.zip" &
-curl -fsSL "$DYLIB_URL"   -o "$TEMP/libOpiumware.zip" &
-curl -fsSL "$MODULES_URL" -o "$TEMP/modules.zip"      &
-curl -fsSL "$UI_URL"      -o "$TEMP/OpiumwareUI.zip"  &
-wait || fail "One or more downloads failed"
+curl -fsSL "https://setup.rbxcdn.com/mac/$VERSION-RobloxPlayer.zip" -o "$TEMP/RobloxPlayer.zip" || fail "RobloxPlayer.zip download failed — version $VERSION may be outdated"
+curl -fsSL "$DYLIB_URL"   -o "$TEMP/libOpiumware.zip" || fail "libOpiumware.zip download failed"
+curl -fsSL "$MODULES_URL" -o "$TEMP/modules.zip"      || fail "modules.zip download failed"
+curl -fsSL "$UI_URL"      -o "$TEMP/OpiumwareUI.zip"  || fail "OpiumwareUI.zip download failed"
 ok "Downloading... - Completed"
 
 step "Installing Opiumware modules"
