@@ -52,13 +52,11 @@ sign_target() {
     if [[ "$deep" == "--deep" ]]; then
         codesign --force --deep --sign - "$target" 2>/dev/null && return 0
         codesign --force --deep --sign - --preserve-metadata=identifier,entitlements "$target" 2>/dev/null && return 0
-        codesign --force --deep --sign - --options=runtime "$target" 2>/dev/null && return 0
     else
         codesign --force --sign - "$target" 2>/dev/null && return 0
         codesign --force --sign - --preserve-metadata=identifier,entitlements "$target" 2>/dev/null && return 0
-        codesign --force --sign - --options=runtime "$target" 2>/dev/null && return 0
     fi
-    warn "codesign soft-failed on $(basename "$target"), continuing anyway"
+    fail "codesign failed on $(basename "$target")"
 }
 
 clear
@@ -125,19 +123,6 @@ UI_URL_LEGACY="$(echo "$REMOTE_LEGACY" | grep -m1 '^UI_URL='  | cut -d'"' -f2)"
 ok "URLs loaded"
 
 MACOS_MAJOR="$(sw_vers -productVersion | awk -F. '{print $1}')"
-ARCH="$(uname -m)"
-if [[ "$ARCH" == "arm64" ]]; then
-    echo
-    echo -e "${YELLOW}${BOLD}⚠ WARNING: You are on ARM.${NC}"
-    echo -e "${YELLOW}I'd suggest you use the ARM Installer to get better performance.${NC}"
-    echo
-    read -rp "$(echo -e "${BOLD}Continue anyway? [Y/N]: ${NC}")" ARM_CHOICE </dev/tty
-    ARM_CHOICE_UPPER="$(echo "$ARM_CHOICE" | tr '[:lower:]' '[:upper:]')"
-    if [[ "$ARM_CHOICE_UPPER" == "N" || "$ARM_CHOICE_UPPER" == "NO" ]]; then
-        echo -e "${CYAN}Exiting. Please use the ARM Installer.${NC}"
-        exit 0
-    fi
-fi
 if [[ "$MACOS_MAJOR" -le 11 ]]; then
     UI_URL="$UI_URL_LEGACY"
     info "macOS $MACOS_MAJOR detected — using Legacy UI automatically"
@@ -182,7 +167,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-killall -9 RobloxPlayer 2>/dev/null; killall -9 Opiumware 2>/dev/null; true
+killall -9 RobloxPlayer Opiumware &>/dev/null || true
 
 for target in "$APP_DIR/Roblox.app" "$APP_DIR/Opiumware.app"; do
     if [ -e "$target" ]; then
@@ -210,9 +195,8 @@ ok "Downloading... - Completed"
 
 step "Installing Opiumware modules"
 (
-    mkdir -p "$TEMP/roblox_extract"
-    unzip -oq "$TEMP/RobloxPlayer.zip" -d "$TEMP/roblox_extract"
-    mv "$TEMP/roblox_extract/RobloxPlayer.app" "$APP_DIR/Roblox.app"
+    unzip -oq "$TEMP/RobloxPlayer.zip" -d "$TEMP"
+    mv "$TEMP/RobloxPlayer.app" "$APP_DIR/Roblox.app"
     strip_quarantine "$APP_DIR/Roblox.app"
 
     unzip -oq "$TEMP/libOpiumware.zip" -d "$TEMP"
@@ -230,7 +214,7 @@ step "Installing Opiumware modules"
     sign_target "$MIMALLOC"
     rm -rf "$APP_DIR/Roblox.app/Contents/MacOS/RobloxPlayerInstaller.app" 2>/dev/null || true
     sign_target "$APP_DIR/Roblox.app" --deep
-    command -v tccutil &>/dev/null && tccutil reset Accessibility com.Roblox.RobloxPlayer >/dev/null 2>&1 || true
+    tccutil reset Accessibility com.Roblox.RobloxPlayer >/dev/null 2>&1 || true
 
     unzip -oq "$TEMP/OpiumwareUI.zip" -d "$TEMP"
     mv -f "$TEMP/Opiumware.app" "$APP_DIR/Opiumware.app"
@@ -239,7 +223,7 @@ step "Installing Opiumware modules"
              ~/Opiumware/modules ~/Opiumware/modules/decompiler ~/Opiumware/modules/LuauLSP
     mv -f "$TEMP/Resources/decompiler" ~/Opiumware/modules/decompiler/Decompiler
     mv -f "$TEMP/Resources/LuauLSP"    ~/Opiumware/modules/LuauLSP/LuauLSP
-    command -v tccutil &>/dev/null && tccutil reset ScreenCapture com.norbyv1.opiumware >/dev/null 2>&1 || true
+    tccutil reset ScreenCapture com.norbyv1.opiumware >/dev/null 2>&1 || true
 
     cat > ~/Opiumware/autoexec/loadingfix.lua << 'LUAEOF'
 if not game:IsLoaded() then
@@ -251,11 +235,7 @@ LUAEOF
 
     PLIST="$APP_DIR/Roblox.app/Contents/Info.plist"
     if [[ -f "$PLIST" ]]; then
-        if plutil -replace CFBundleExecutable -string "RobloxPlayer" "$PLIST" 2>/dev/null; then
-            true
-        elif command -v defaults &>/dev/null; then
-            defaults write "$PLIST" CFBundleExecutable "RobloxPlayer" 2>/dev/null || true
-        fi
+        plutil -replace CFBundleExecutable -string "RobloxPlayer" "$PLIST" 2>/dev/null || true
     fi
 
     LAUNCHER="$APP_DIR/Roblox.app/Contents/MacOS/RobloxLauncher"
