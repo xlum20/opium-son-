@@ -103,7 +103,7 @@ cat <<'EOF'
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 EOF
 echo -e "${NC}"
-echo -e "${BLUE}=[ Opiumware-Chan (Intel) Installer ]=${NC}"
+echo -e "${BLUE}=[ Opiumware (Intel) Installer ]=${NC}"
 echo -e "${CYAN}Developed by @norbyv1 | Fixed build by trial support king dior v0.2 ${NC}"
 [[ "$DEBUG" -eq 1 ]] && warn "Debug mode ON"
 
@@ -181,8 +181,7 @@ rm -rf ~/Opiumware/modules/LuauLSP ~/Opiumware/modules/decompiler
 rm -f ~/Opiumware/modules/update.json 2>/dev/null || true
 
 step "Fetching client version"
-VERSION="$(echo "$REMOTE_LEGACY" | grep -m1 '^VERSION=' | cut -d'"' -f2)"
-[[ -n "$VERSION" ]] || fail "Could not parse VERSION from legacyinst"
+VERSION="version-f0d1b413481b4d96"
 info "Version: ${BOLD}$VERSION${NC}"
 
 MIMALLOC="$APP_DIR/Roblox.app/Contents/MacOS/libmimalloc.3.dylib"
