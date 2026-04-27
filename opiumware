@@ -103,7 +103,7 @@ cat <<'EOF'
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 EOF
 echo -e "${NC}"
-echo -e "${BLUE}=[ Opiumware (Intel) Installer ]=${NC}"
+echo -e "${BLUE}=[ Opiumware-Chan (Intel) Installer ]=${NC}"
 echo -e "${CYAN}Developed by @norbyv1 | Fixed build by trial support king dior v0.2 ${NC}"
 [[ "$DEBUG" -eq 1 ]] && warn "Debug mode ON"
 
@@ -188,11 +188,10 @@ info "Version: ${BOLD}$VERSION${NC}"
 MIMALLOC="$APP_DIR/Roblox.app/Contents/MacOS/libmimalloc.3.dylib"
 
 step "Downloading..."
-curl -fsSL "https://setup.rbxcdn.com/mac/$VERSION-RobloxPlayer.zip" -o "$TEMP/RobloxPlayer.zip" &
-curl -fsSL "$DYLIB_URL"   -o "$TEMP/libOpiumware.zip" &
-curl -fsSL "$MODULES_URL" -o "$TEMP/modules.zip"      &
-curl -fsSL "$UI_URL"      -o "$TEMP/OpiumwareUI.zip"  &
-wait || fail "One or more downloads failed"
+curl -fsSL "https://setup.rbxcdn.com/mac/$VERSION-RobloxPlayer.zip" -o "$TEMP/RobloxPlayer.zip" || fail "RobloxPlayer.zip download failed — version $VERSION may be outdated"
+curl -fsSL "$DYLIB_URL"   -o "$TEMP/libOpiumware.zip" || fail "libOpiumware.zip download failed"
+curl -fsSL "$MODULES_URL" -o "$TEMP/modules.zip"      || fail "modules.zip download failed"
+curl -fsSL "$UI_URL"      -o "$TEMP/OpiumwareUI.zip"  || fail "OpiumwareUI.zip download failed"
 ok "Downloading... - Completed"
 
 step "Installing Opiumware modules"
@@ -200,7 +199,6 @@ step "Installing Opiumware modules"
     unzip -oq "$TEMP/RobloxPlayer.zip" -d "$TEMP"
     mv "$TEMP/RobloxPlayer.app" "$APP_DIR/Roblox.app"
     strip_quarantine "$APP_DIR/Roblox.app"
-    codesign --remove-signature "$APP_DIR/Roblox.app/Contents/MacOS/RobloxPlayer" 2>/dev/null || true
 
     unzip -oq "$TEMP/libOpiumware.zip" -d "$TEMP"
     mv "$TEMP/libOpiumware.dylib" "$APP_DIR/Roblox.app/Contents/Resources/libOpiumware.dylib"
@@ -226,9 +224,8 @@ step "Installing Opiumware modules"
     sign_target "$APP_DIR/Opiumware.app" --deep
     mkdir -p ~/Opiumware/workspace ~/Opiumware/autoexec ~/Opiumware/themes \
              ~/Opiumware/modules ~/Opiumware/modules/decompiler ~/Opiumware/modules/LuauLSP
-    mv -f "$TEMP/Resources/Decompiler" ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || \
-    mv -f "$TEMP/Resources/decompiler" ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || true
-    mv -f "$TEMP/Resources/LuauLSP"    ~/Opiumware/modules/LuauLSP/LuauLSP 2>/dev/null || true
+    mv -f "$TEMP/Resources/decompiler" ~/Opiumware/modules/decompiler/Decompiler
+    mv -f "$TEMP/Resources/LuauLSP"    ~/Opiumware/modules/LuauLSP/LuauLSP
     tccutil reset ScreenCapture com.norbyv1.opiumware >/dev/null 2>&1 || true
 
     cat > ~/Opiumware/autoexec/loadingfix.lua << 'LUAEOF'
