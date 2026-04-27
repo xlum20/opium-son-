@@ -11,14 +11,13 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
-PINK='\033[1;35m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-CHECK="${PINK}✔${NC}"
+CHECK="${GREEN}✔${NC}"
 CROSS="${RED}✖${NC}"
-INFO="${PINK}➜${NC}"
-WARN="${PINK}⚠${NC}"
+INFO="${CYAN}➜${NC}"
+WARN="${YELLOW}⚠${NC}"
 
 UI_URL_NEW=""
 UI_URL_LEGACY=""
@@ -27,7 +26,7 @@ DEBUG=0
 [[ "${1:-}" == "--debug" ]] && DEBUG=1
 
 dbg()  { [[ "$DEBUG" -eq 1 ]] && echo -e "${YELLOW}[DBG]${NC} $*" || true; }
-step() { echo -e "\n${BOLD}${PINK}==> $1${NC}"; }
+step() { echo -e "\n${BOLD}${CYAN}==> $1${NC}"; }
 ok()   { echo -e "${CHECK} $1"; }
 info() { echo -e "${INFO} $1"; }
 warn() { echo -e "${WARN} $1"; }
@@ -104,8 +103,8 @@ cat <<'EOF'
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 EOF
 echo -e "${NC}"
-echo -e "${PINK}=[ Opium-Chan Installer ]=${NC}"
-echo -e "${PINK}Developed by @norbyv1 | Fixed build by trial support king dior v0.2 ${NC}"
+echo -e "${BLUE}=[ Opiumware (Intel) Installer ]=${NC}"
+echo -e "${CYAN}Developed by @norbyv1 | Fixed build by trial support king dior v0.2 ${NC}"
 [[ "$DEBUG" -eq 1 ]] && warn "Debug mode ON"
 
 step "Fetching latest URLs"
@@ -182,7 +181,8 @@ rm -rf ~/Opiumware/modules/LuauLSP ~/Opiumware/modules/decompiler
 rm -f ~/Opiumware/modules/update.json 2>/dev/null || true
 
 step "Fetching client version"
-VERSION="version-08d2b9589bf14135"
+VERSION="$(echo "$REMOTE_LEGACY" | grep -m1 '^VERSION=' | cut -d'"' -f2)"
+[[ -n "$VERSION" ]] || fail "Could not parse VERSION from legacyinst"
 info "Version: ${BOLD}$VERSION${NC}"
 
 MIMALLOC="$APP_DIR/Roblox.app/Contents/MacOS/libmimalloc.3.dylib"
@@ -207,10 +207,12 @@ step "Installing Opiumware modules"
 
     unzip -oq "$TEMP/modules.zip" -d "$TEMP"
     chmod +x "$TEMP/Resources/Injector"
+    xattr -cr "$TEMP/Resources/Injector" 2>/dev/null || true
+    codesign --force --sign - "$TEMP/Resources/Injector" 2>/dev/null || true
     "$TEMP/Resources/Injector" \
         "$APP_DIR/Roblox.app/Contents/Resources/libOpiumware.dylib" \
         "$MIMALLOC" \
-        --strip-codesig --all-yes >/dev/null 2>&1
+        --strip-codesig --all-yes >/dev/null 2>&1 || fail "Injector failed — try running installer as admin with sudo"
     mv "${MIMALLOC}_patched" "$MIMALLOC"
 
     sign_target "$APP_DIR/Roblox.app/Contents/Resources/libOpiumware.dylib"
