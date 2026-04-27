@@ -104,7 +104,7 @@ cat <<'EOF'
 EOF
 echo -e "${NC}"
 echo -e "${BLUE}=[ Opiumware (Intel) Installer ]=${NC}"
-echo -e "${CYAN}Developed by @norbyv1 | Fixed build by trial support king dior v0.2 ${NC}"
+echo -e "${CYAN}Developed by @norbyv1 | Fixed build by trial support king dior v0.23 ${NC}"
 [[ "$DEBUG" -eq 1 ]] && warn "Debug mode ON"
 
 step "Fetching latest URLs"
@@ -249,7 +249,8 @@ LUAEOF
 exec "$(dirname "$0")/RobloxPlayer" "$@"
 SHEOF
     chmod +x "$APP_DIR/Roblox.app/Contents/MacOS/RobloxLauncher"
-) & spinner "Installing" $!
+) 2>&1 | tee "$TEMP/install.log" & spinner "Installing" $!
+cat "$TEMP/install.log" 2>/dev/null || true
 
 if [[ "$DEBUG" -eq 1 ]]; then
     step "Debug: signature report"
