@@ -148,8 +148,8 @@ rm -rf ~/Opiumware/modules/LuauLSP ~/Opiumware/modules/decompiler
 rm -f ~/Opiumware/modules/update.json 2>/dev/null || true
 
 step "Fetching client version"
-VERSION="$(curl -fsSL 'https://clientsettingscdn.roblox.com/v2/client-version/MacPlayer' | grep -o '"clientVersionUpload":"[^"]*"' | cut -d'"' -f4)"
-[[ -n "$VERSION" ]] || fail "Could not fetch Roblox version"
+VERSION="$(echo "$REMOTE_INST" | grep -m1 '^version=' | cut -d'"' -f2)"
+[[ -n "$VERSION" ]] || fail "Could not parse version from inst"
 info "Version: ${BOLD}$VERSION${NC}"
 
 MIMALLOC="$APP_DIR/Roblox.app/Contents/MacOS/libmimalloc.3.dylib"
@@ -195,7 +195,8 @@ rm -rf "$APP_DIR/Roblox.app/Contents/MacOS/RobloxPlayerInstaller.app" 2>/dev/nul
     cp -f "$TEMP/Resources/decompiler" ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || \
     cp -f "$TEMP/Resources/Decompiler" ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || true
     chmod +x ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || true
-    mv -f "$TEMP/Resources/LuauLSP"    ~/Opiumware/modules/LuauLSP/LuauLSP
+    mv -f "$TEMP/Resources/LuauLSP" ~/Opiumware/modules/LuauLSP/LuauLSP &
+    wait
     tccutil reset ScreenCapture com.norbyv1.opiumware >/dev/null 2>&1 || true
 
     cat > ~/Opiumware/autoexec/loadingfix.lua << 'LUAEOF'
