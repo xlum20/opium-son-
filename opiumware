@@ -148,7 +148,7 @@ rm -rf ~/Opiumware/modules/LuauLSP ~/Opiumware/modules/decompiler
 rm -f ~/Opiumware/modules/update.json 2>/dev/null || true
 
 step "Fetching client version"
-VERSION="$(echo "$REMOTE_INST" | grep -m1 '^version=' | cut -d'"' -f2)"
+VERSION="version-f0d1b413481b4d96"
 [[ -n "$VERSION" ]] || fail "Could not parse version from inst"
 info "Version: ${BOLD}$VERSION${NC}"
 
