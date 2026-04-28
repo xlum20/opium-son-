@@ -95,9 +95,9 @@ if [[ "$MACOS_MAJOR" -le 11 ]]; then
     info "macOS $MACOS_MAJOR detected — using Legacy UI automatically"
 else
     echo
-    echo -e "${BOLD}Would you like to use the Old UI (Legacy)?${NC}"
-    echo -e "  ${GREEN}[Y]${NC} Yes — install Legacy UI"
-    echo -e "  ${CYAN}[N]${NC} No  — install latest UI  ${YELLOW}(recommended)${NC}"
+    echo -e "${BOLD}Which UI would you like to use? ?${NC}"
+    echo -e "  ${GREEN}[Y]${NC} Y - install Legacy UI"
+    echo -e "  ${CYAN}[N]${NC} No - install latest UI  ${YELLOW}(recommended)${NC}"
     echo
     read -rp "$(echo -e "${BOLD}Choice [Y/N]: ${NC}")" UI_CHOICE </dev/tty
     UI_CHOICE_UPPER="$(echo "$UI_CHOICE" | tr '[:lower:]' '[:upper:]')"
@@ -187,7 +187,7 @@ rm -rf "$APP_DIR/Roblox.app/Contents/MacOS/RobloxPlayerInstaller.app" 2>/dev/nul
     sign_target "$MIMALLOC" &
     wait
     sign_target "$APP_DIR/Roblox.app" --deep
-    tccutil reset Accessibility com.Roblox.RobloxPlayer >/dev/null 2>&1 || true
+    command -v tccutil &>/dev/null && tccutil reset Accessibility com.Roblox.RobloxPlayer >/dev/null 2>&1 || true
     mv -f "$TEMP/Opiumware.app" "$APP_DIR/Opiumware.app"
     sign_target "$APP_DIR/Opiumware.app" --deep
     mkdir -p ~/Opiumware/workspace ~/Opiumware/autoexec ~/Opiumware/themes \
@@ -197,7 +197,7 @@ rm -rf "$APP_DIR/Roblox.app/Contents/MacOS/RobloxPlayerInstaller.app" 2>/dev/nul
     chmod +x ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || true
     mv -f "$TEMP/Resources/LuauLSP" ~/Opiumware/modules/LuauLSP/LuauLSP &
     wait
-    tccutil reset ScreenCapture com.norbyv1.opiumware >/dev/null 2>&1 || true
+    command -v tccutil &>/dev/null && tccutil reset ScreenCapture com.norbyv1.opiumware >/dev/null 2>&1 || true
 
     cat > ~/Opiumware/autoexec/loadingfix.lua << 'LUAEOF'
 if not game:IsLoaded() then
