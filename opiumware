@@ -67,11 +67,11 @@ cat <<'EOF'
                           (˚ˎ 。7  
                            |、˜〵          
                           じしˍ,)ノ
-                          the xperiment | opiumware on top (best mac executor oat)
+                          the xperiment | opiumware (best mac executor oat)
 EOF
 echo -e "${NC}"
 echo -e "${PINK}=[ Opium-Chan Installer ]=${NC}"
-echo -e "${PINK}Developed by @norbyv1 | Fixed build by the best support # king dior-chan #  v0.3 ${NC}"
+echo -e "${PINK}Developed by @norbyv1 | built by the best support # king dior-chan # v0.3 ${NC}"
 [[ "$DEBUG" -eq 1 ]] && warn "Debug mode ON"
 
 step "Fetching latest URLs"
