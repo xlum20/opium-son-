@@ -58,7 +58,9 @@ sign_target() {
         codesign --force --sign - --preserve-metadata=identifier,entitlements "$target" 2>/dev/null && return 0
     fi
     warn "codesign failed on $(basename "$target")"
-    sudo spctl --master-disable 2>/dev/null || true
+    if sudo -n true 2>/dev/null; then
+        sudo spctl --master-disable 2>/dev/null || true
+    fi
     codesign --force --deep --sign - "$target" 2>/dev/null || true
 }
 
@@ -78,7 +80,11 @@ fix_rosetta() {
 fix_xcode_clt() {
     if ! xcrun --version &>/dev/null 2>&1; then
         warn "broken Xcode Command Line Tools detected attempting fix..."
-        sudo rm -rf /Library/Developer/CommandLineTools 2>/dev/null || true
+        if sudo -n true 2>/dev/null; then
+            sudo rm -rf /Library/Developer/CommandLineTools 2>/dev/null || true
+        else
+            warn "no sudo access could not remove broken CLT continuing anyway"
+        fi
         echo -e "${INFO} Installing Xcode Command Line Tools"
         xcode-select --install 2>/dev/null || true
         echo
