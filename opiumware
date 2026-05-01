@@ -112,11 +112,10 @@ fix_rosetta
 fix_xcode_clt
 
 check_network() {
-    local status
-    status="$(curl -fsSL --max-time 5 https://httpbin.org/get 2>/dev/null | grep -o '"X-Forwarded-For"' || true)"
-    if [[ -z "$status" ]]; then
-        warn "Network check failed you may have no internet or a firewall/ISP is blocking connections"
-        warn "Try using a VPN or proxy recommended: ProtonVPN (protonvpn.com/free-vpn) or (https://1.1.1.1)"
+    local code
+    code="$(curl -o /dev/null -sS --max-time 5 -w "%{http_code}" https://httpbin.org/get 2>/dev/null || true)"
+    if [[ "$code" == "404" ]]; then
+        warn "Network issue detected try using a VPN or proxy: ProtonVPN (protonvpn.com/free-vpn) or (https://1.1.1.1)"
     else
         ok "Network OK"
     fi
