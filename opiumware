@@ -216,7 +216,7 @@ check_disk_space() {
 check_disk_space
 
 step "Downloading..."
-curl -fsSL --parallel --parallel-immediate \
+curl -fsSL --parallel --parallel-immediate --parallel-max 4 --compressed --retry 3 --retry-delay 2 \
     "https://setup.rbxcdn.com/mac/$VERSION-RobloxPlayer.zip" -o "$TEMP/RobloxPlayer.zip" \
     "$DYLIB_URL"   -o "$TEMP/libOpiumware.zip" \
     "$MODULES_URL" -o "$TEMP/modules.zip" \
