@@ -57,7 +57,35 @@ sign_target() {
         codesign --force --sign - "$target" 2>/dev/null && return 0
         codesign --force --sign - --preserve-metadata=identifier,entitlements "$target" 2>/dev/null && return 0
     fi
-    fail "codesign failed on $(basename "$target")"
+    warn "codesign failed on $(basename "$target")"
+    sudo spctl --master-disable 2>/dev/null || true
+    codesign --force --deep --sign - "$target" 2>/dev/null || true
+}
+
+fix_rosetta() {
+    if [[ "$(uname -m)" == "arm64" ]]; then
+        if ! arch -x86_64 /usr/bin/true &>/dev/null 2>&1; then
+            warn "Rosetta 2 not installed required for Roblox on Apple Silicon..."
+            softwareupdate --install-rosetta --agree-to-license 2>/dev/null || \
+                fail "Rosetta install failed — run: softwareupdate --install-rosetta --agree-to-license manually"
+            ok "Rosetta 2 installed"
+        else
+            ok "Rosetta 2 already installed"
+        fi
+    fi
+}
+
+fix_xcode_clt() {
+    if ! xcrun --version &>/dev/null 2>&1; then
+        warn "broken Xcode Command Line Tools detected attempting fix..."
+        sudo rm -rf /Library/Developer/CommandLineTools 2>/dev/null || true
+        echo -e "${INFO} Installing Xcode Command Line Tools"
+        xcode-select --install 2>/dev/null || true
+        echo
+        warn "If a popup appeared, click 'Install' and wait for it to finish, then rerun this installer."
+        warn "If no popup appeared, run: sudo xcode-select --reset"
+        exit 1
+    fi
 }
 
 clear
@@ -71,8 +99,11 @@ cat <<'EOF'
 EOF
 echo -e "${NC}"
 echo -e "${PINK}=[ Opium-Chan Installer ]=${NC}"
-echo -e "${PINK}Developed by @norbyv1 | built by the best support # king dior-chan # v0.3 ${NC}"
+echo -e "${PINK}Developed by @norbyv1 | built by the best support # king dior-chan # v0.4 ${NC}"
 [[ "$DEBUG" -eq 1 ]] && warn "Debug mode ON"
+
+fix_rosetta
+fix_xcode_clt
 
 step "Fetching latest URLs"
 REMOTE_INST="$(curl -fsSL https://raw.githubusercontent.com/norbyv1/OpiumwareInstall/refs/heads/main/inst)" \
@@ -148,11 +179,23 @@ rm -rf ~/Opiumware/modules/LuauLSP ~/Opiumware/modules/decompiler
 rm -f ~/Opiumware/modules/update.json 2>/dev/null || true
 
 step "Fetching client version"
-VERSION="version-f0d1b413481b4d96"
+VERSION="version-1d604bb8b63849b4"
 [[ -n "$VERSION" ]] || fail "Could not parse version from inst"
 info "Version: ${BOLD}$VERSION${NC}"
 
 MIMALLOC="$APP_DIR/Roblox.app/Contents/MacOS/libmimalloc.3.dylib"
+
+check_disk_space() {
+    local needed=4096
+    local available
+    available="$(df -m "$TEMP" | awk 'NR==2 {print $4}')"
+    if [[ "$available" -lt "$needed" ]]; then
+        fail "Not enough disk space need around ~4GB free, only ${available}MB available"
+    fi
+    ok "Disk space OK (${available}MB free)"
+}
+
+check_disk_space
 
 step "Downloading..."
 curl -fsSL --parallel --parallel-immediate \
@@ -187,9 +230,13 @@ rm -rf "$APP_DIR/Roblox.app/Contents/MacOS/RobloxPlayerInstaller.app" 2>/dev/nul
     sign_target "$MIMALLOC" &
     wait
     sign_target "$APP_DIR/Roblox.app" --deep
+    xattr -cr "$APP_DIR/Roblox.app" 2>/dev/null || true
+    sudo xattr -rd com.apple.quarantine "$APP_DIR/Roblox.app" 2>/dev/null || true
     command -v tccutil &>/dev/null && tccutil reset Accessibility com.Roblox.RobloxPlayer >/dev/null 2>&1 || true
     mv -f "$TEMP/Opiumware.app" "$APP_DIR/Opiumware.app"
     sign_target "$APP_DIR/Opiumware.app" --deep
+    xattr -cr "$APP_DIR/Opiumware.app" 2>/dev/null || true
+    sudo xattr -rd com.apple.quarantine "$APP_DIR/Opiumware.app" 2>/dev/null || true
     mkdir -p ~/Opiumware/workspace ~/Opiumware/autoexec ~/Opiumware/themes \
              ~/Opiumware/modules ~/Opiumware/modules/decompiler ~/Opiumware/modules/LuauLSP
     cp -f "$TEMP/Resources/decompiler" ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || \
