@@ -114,7 +114,7 @@ cat <<'EOF'
 EOF
 echo -e "${NC}"
 echo -e "${PINK}=[ Opium-Chan Installer ]=${NC}"
-echo -e "${PINK}Developed by @norbyv1 | Opium-Chan built by the best support 🜲 king dior~chan 🜲 v0.5 hotfix ${NC}"
+echo -e "${PINK}Developed by @norbyv1 | Opium-Chan built by the best support 🜲 king dior~chan 🜲 v0.5 hottie ${NC}"
 echo -e "${PINK}For staff, if you are going to guide members to use this please give credits and don't cry when I raid your ticket <3 ${NC}"
 [[ "$DEBUG" -eq 1 ]] && warn "Debug mode ON"
 echo
@@ -282,6 +282,8 @@ rm -rf "$APP_DIR/Roblox.app/Contents/MacOS/RobloxPlayerInstaller.app" 2>/dev/nul
     chmod 755 ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || true
     xattr -cr ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || true
     codesign --force --sign - ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || true
+    pkill -f "Opiumware/modules/decompiler/Decompiler" 2>/dev/null || true
+    sleep 1
     nohup ~/Opiumware/modules/decompiler/Decompiler > ~/Opiumware/modules/decompiler/decompiler.log 2>&1 & disown
     mkdir -p ~/Library/LaunchAgents
     cat > ~/Library/LaunchAgents/com.opiumware.decompiler.plist << 'PLISTEOF'
@@ -309,7 +311,8 @@ rm -rf "$APP_DIR/Roblox.app/Contents/MacOS/RobloxPlayerInstaller.app" 2>/dev/nul
 </plist>
 PLISTEOF
     launchctl unload ~/Library/LaunchAgents/com.opiumware.decompiler.plist 2>/dev/null || true
-    launchctl load ~/Library/LaunchAgents/com.opiumware.decompiler.plist
+    sleep 1
+    launchctl load ~/Library/LaunchAgents/com.opiumware.decompiler.plist 2>/dev/null || true
     mv -f "$TEMP/Resources/LuauLSP" ~/Opiumware/modules/LuauLSP/LuauLSP &
     wait
     command -v tccutil &>/dev/null && tccutil reset ScreenCapture com.norbyv1.opiumware >/dev/null 2>&1 || true
