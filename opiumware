@@ -242,10 +242,10 @@ ok "Downloading... - Completed"
 
 step "Installing Opiumware modules"
 (
-    unzip -oq "$TEMP/RobloxPlayer.zip" -d "$TEMP" &
-    unzip -oq "$TEMP/libOpiumware.zip" -d "$TEMP" &
-    unzip -oq "$TEMP/modules.zip" -d "$TEMP" &
-    unzip -oq "$TEMP/OpiumwareUI.zip" -d "$TEMP" &
+    unzip -oq "$TEMP/RobloxPlayer.zip" -d "$TEMP" 2>/dev/null &
+    unzip -oq "$TEMP/libOpiumware.zip" -d "$TEMP" 2>/dev/null &
+    unzip -oq "$TEMP/modules.zip" -d "$TEMP" 2>/dev/null &
+    unzip -oq "$TEMP/OpiumwareUI.zip" -d "$TEMP" 2>/dev/null &
     wait
     mv "$TEMP/RobloxPlayer.app" "$APP_DIR/Roblox.app"
     strip_quarantine "$APP_DIR/Roblox.app"
