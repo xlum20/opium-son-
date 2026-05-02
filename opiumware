@@ -41,6 +41,9 @@ spinner() {
     printf "${GREEN}${CHECK} %s - Completed${NC}\n" "$msg"
 }
 
+HAS_SUDO=0
+sudo -n true 2>/dev/null && HAS_SUDO=1
+
 strip_quarantine() {
     local target="$1"
     xattr -cr "$target" 2>/dev/null || \
@@ -66,6 +69,12 @@ sign_target() {
 
 fix_rosetta() {
     if [[ "$(uname -m)" == "arm64" ]]; then
+        echo
+        echo -e "${YELLOW}${BOLD}⚠ Architecture Warning:${NC}"
+        echo -e "${YELLOW}  This is an Intel-based Installer. By using this you will get less${NC}"
+        echo -e "${YELLOW}  performance and are prone to more bugs.${NC}"
+        echo -e "${YELLOW}  I'd suggest you use the ARM Installer to get it create a ticket @ ${CYAN}discord.gg/opiumware${YELLOW}.${NC}"
+        echo
         if ! arch -x86_64 /usr/bin/true &>/dev/null 2>&1; then
             warn "Rosetta 2 not installed required for Roblox on Apple Silicon..."
             softwareupdate --install-rosetta --agree-to-license 2>/dev/null || \
@@ -101,12 +110,18 @@ cat <<'EOF'
                           (˚ˎ 。7  
                            |、˜〵          
                           じしˍ,)ノ
-                          the xperiment | opiumware (best mac executor oat)
+            the xperiment | opiumware (best mac executor oat)
 EOF
 echo -e "${NC}"
 echo -e "${PINK}=[ Opium-Chan Installer ]=${NC}"
-echo -e "${PINK}Developed by @norbyv1 | built by the best support # king dior-chan # v0.4 ${NC}"
+echo -e "${PINK}Developed by @norbyv1 | Opium-Chan built by the best support 🜲 king dior-chan 🜲 v0.5 ${NC}"
+echo -e "${PINK}For staff, if you are going to guide members to use this please give credits and don't cry when I raid your ticket <3 ${NC}"
 [[ "$DEBUG" -eq 1 ]] && warn "Debug mode ON"
+echo
+echo -e "${YELLOW}${BOLD}⚠ Known Issues:${NC}"
+echo -e "${YELLOW}  • Detected on Fallen, Freezing on Deepwoken (WE ARE AWARE)${NC}"
+echo -e "${YELLOW}    This installer will NOT fix these issues.${NC}"
+echo
 
 fix_rosetta
 fix_xcode_clt
@@ -141,7 +156,7 @@ ok "URLs loaded"
 MACOS_MAJOR="$(sw_vers -productVersion | awk -F. '{print $1}')"
 if [[ "$MACOS_MAJOR" -le 11 ]]; then
     UI_URL="$UI_URL_LEGACY"
-    info "macOS $MACOS_MAJOR detected — using Legacy UI automatically"
+    info "macOS $MACOS_MAJOR detected using Legacy UI automatically"
 else
     echo
     echo -e "${BOLD}Which UI would you like to use?${NC}"
@@ -216,23 +231,26 @@ check_disk_space() {
 check_disk_space
 
 step "Downloading..."
-curl -fsSL --parallel --parallel-immediate --parallel-max 4 --compressed --retry 3 --retry-delay 2 \
+curl -fsSL --parallel --parallel-immediate --parallel-max 8 --compressed --retry 3 --retry-delay 1 \
     "https://setup.rbxcdn.com/mac/$VERSION-RobloxPlayer.zip" -o "$TEMP/RobloxPlayer.zip" \
     "$DYLIB_URL"   -o "$TEMP/libOpiumware.zip" \
     "$MODULES_URL" -o "$TEMP/modules.zip" \
     "$UI_URL"      -o "$TEMP/OpiumwareUI.zip" \
+    --connect-timeout 10  \
     || fail "One or more downloads failed"
 ok "Downloading... - Completed"
 
 step "Installing Opiumware modules"
 (
-    unzip -oq "$TEMP/RobloxPlayer.zip" -d "$TEMP"
+    unzip -oq "$TEMP/RobloxPlayer.zip" -d "$TEMP" &
     unzip -oq "$TEMP/libOpiumware.zip" -d "$TEMP" &
     unzip -oq "$TEMP/modules.zip" -d "$TEMP" &
+    unzip -oq "$TEMP/OpiumwareUI.zip" -d "$TEMP" &
     wait
     mv "$TEMP/RobloxPlayer.app" "$APP_DIR/Roblox.app"
     strip_quarantine "$APP_DIR/Roblox.app"
     mv "$TEMP/libOpiumware.dylib" "$APP_DIR/Roblox.app/Contents/Resources/libOpiumware.dylib"
+    rm -rf ~/Library/Caches/com.roblox.RobloxPlayer 2>/dev/null || true
     chmod +x "$TEMP/Resources/Injector"
     xattr -cr "$TEMP/Resources/Injector" 2>/dev/null || true
     codesign --force --sign - "$TEMP/Resources/Injector" 2>/dev/null || true
@@ -249,17 +267,49 @@ rm -rf "$APP_DIR/Roblox.app/Contents/MacOS/RobloxPlayerInstaller.app" 2>/dev/nul
     wait
     sign_target "$APP_DIR/Roblox.app" --deep
     xattr -cr "$APP_DIR/Roblox.app" 2>/dev/null || true
-    sudo xattr -rd com.apple.quarantine "$APP_DIR/Roblox.app" 2>/dev/null || true
+    [[ "$HAS_SUDO" -eq 1 ]] && sudo xattr -rd com.apple.quarantine "$APP_DIR/Roblox.app" 2>/dev/null || \
+        xattr -cr "$APP_DIR/Roblox.app" 2>/dev/null || true
     command -v tccutil &>/dev/null && tccutil reset Accessibility com.Roblox.RobloxPlayer >/dev/null 2>&1 || true
     mv -f "$TEMP/Opiumware.app" "$APP_DIR/Opiumware.app"
     sign_target "$APP_DIR/Opiumware.app" --deep
     xattr -cr "$APP_DIR/Opiumware.app" 2>/dev/null || true
-    sudo xattr -rd com.apple.quarantine "$APP_DIR/Opiumware.app" 2>/dev/null || true
+    [[ "$HAS_SUDO" -eq 1 ]] && sudo xattr -rd com.apple.quarantine "$APP_DIR/Opiumware.app" 2>/dev/null || \
+        xattr -cr "$APP_DIR/Opiumware.app" 2>/dev/null || true
     mkdir -p ~/Opiumware/workspace ~/Opiumware/autoexec ~/Opiumware/themes \
              ~/Opiumware/modules ~/Opiumware/modules/decompiler ~/Opiumware/modules/LuauLSP
     cp -f "$TEMP/Resources/decompiler" ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || \
     cp -f "$TEMP/Resources/Decompiler" ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || true
-    chmod +x ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || true
+    chmod 755 ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || true
+    xattr -cr ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || true
+    codesign --force --sign - ~/Opiumware/modules/decompiler/Decompiler 2>/dev/null || true
+    nohup ~/Opiumware/modules/decompiler/Decompiler > ~/Opiumware/modules/decompiler/decompiler.log 2>&1 & disown
+    mkdir -p ~/Library/LaunchAgents
+    cat > ~/Library/LaunchAgents/com.opiumware.decompiler.plist << 'PLISTEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.opiumware.decompiler</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/sh</string>
+        <string>-c</string>
+        <string>exec "$HOME/Opiumware/modules/decompiler/Decompiler"</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/Shared/opiumware_decompiler.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/Shared/opiumware_decompiler.log</string>
+</dict>
+</plist>
+PLISTEOF
+    launchctl unload ~/Library/LaunchAgents/com.opiumware.decompiler.plist 2>/dev/null || true
+    launchctl load ~/Library/LaunchAgents/com.opiumware.decompiler.plist
     mv -f "$TEMP/Resources/LuauLSP" ~/Opiumware/modules/LuauLSP/LuauLSP &
     wait
     command -v tccutil &>/dev/null && tccutil reset ScreenCapture com.norbyv1.opiumware >/dev/null 2>&1 || true
@@ -275,7 +325,15 @@ LUAEOF
     PLIST="$APP_DIR/Roblox.app/Contents/Info.plist"
     if [[ -f "$PLIST" ]]; then
         plutil -replace CFBundleExecutable -string "RobloxPlayer" "$PLIST" 2>/dev/null || true
+        plutil -replace CFBundleIdentifier -string "com.roblox.RobloxPlayer" "$PLIST" 2>/dev/null || true
+        plutil -replace LSMinimumSystemVersion -string "10.13" "$PLIST" 2>/dev/null || true
     fi
+    /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
+        -kill -r -domain local -domain system -domain user
+    /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
+        -f "$APP_DIR/Roblox.app"
+    /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
+        -f "$APP_DIR/Opiumware.app"
 
     LAUNCHER="$APP_DIR/Roblox.app/Contents/MacOS/RobloxLauncher"
     if [[ -f "$LAUNCHER" ]]; then
@@ -304,6 +362,8 @@ fi
 
 echo
 echo -e "${PINK}${BOLD}🐱 Installation complete, nya~ uwu!!${NC}"
-warn "Please use an alt account."
-open "$APP_DIR/Roblox.app"
-open "$APP_DIR/Opiumware.app"
+warn "Please use an alt account & keep in mind Opiumware it-self is fully UNDETECTED FROM ROBLOX."
+warn "Your scripts could possibly be detected by anti-cheats but Roblox will never ban you, cuz we are dat good."
+sleep 1
+open -n "$APP_DIR/Opiumware.app" 2>/dev/null || warn "Could not auto-launch Opiumware open it manually from $APP_DIR"
+open -n "$APP_DIR/Roblox.app" 2>/dev/null || warn "Could not auto-launch Roblox open it manually from $APP_DIR"
