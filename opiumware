@@ -344,8 +344,8 @@ LUAEOF
 exec "$(dirname "$0")/RobloxPlayer" "$@"
 SHEOF
     chmod +x "$APP_DIR/Roblox.app/Contents/MacOS/RobloxLauncher"
-) 2>&1 | grep -v "__MACOSX\|Attribute not found\|unable to process" | tee "$TEMP/install.log" & spinner "Installing" $!
-cat "$TEMP/install.log" 2>/dev/null | grep -v "__MACOSX\|Attribute not found\|unable to process" || true
+) 2>&1 | tee "$TEMP/install.log" & spinner "Installing" $!
+cat "$TEMP/install.log" 2>/dev/null || true
 
 if [[ "$DEBUG" -eq 1 ]]; then
     step "Debug: signature report"
