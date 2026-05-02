@@ -73,7 +73,8 @@ fix_rosetta() {
         echo -e "${YELLOW}${BOLD}⚠ Architecture Warning:${NC}"
         echo -e "${YELLOW}  This is an Intel-based Installer. By using this you will get less${NC}"
         echo -e "${YELLOW}  performance and are prone to more bugs.${NC}"
-        echo -e "${YELLOW}  I'd suggest you use the ARM Installer to get it create a ticket @ ${CYAN}discord.gg/opiumware${YELLOW}.${NC}"
+        echo -e "${YELLOW}  First, run this and then run ARM Installer.${NC}"
+        echo -e "${YELLOW}  To get it create a ticket @ ${CYAN}discord.gg/opiumware${YELLOW}.${NC}"
         echo
         if ! arch -x86_64 /usr/bin/true &>/dev/null 2>&1; then
             warn "Rosetta 2 not installed required for Roblox on Apple Silicon..."
